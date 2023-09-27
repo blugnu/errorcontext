@@ -14,6 +14,10 @@
 
 # blugnu/errorcontext
 
+> **TL;DR**: to get started, `go get github.com/blugnu/errorcontext@v0.2.0` (or later, if available)
+
+> **NOTE:** _this module was one of the first that I developed and I made some mistakes when initially publishing it.  This has resulted in problems with version `v0.1.0` already cached in the golang ecosystem.  The first useable version of this module therefore is `v0.2.0`._
+
 A `go` package providing an `error` implementation that wraps an `error` together with a supplied `Context`.  A number of factory functions are provided to create/wrap contextual errors in a variety of circumstances:
 
 | function | description |
@@ -167,7 +171,7 @@ A simple convention then ensures that the error is logged _only once_ **and** wi
 The convention has two parts:
 
 1. If an error is returned, it is _**not** logged_ but returned as an _`ErrorWithContext`_ (if a local `Context` is available, or returned without context otherwise)
-2. If an error is _**not**_ returned (usually at the effective or actual root of the call hierarchy) it is logged, extracting any `Context` from the `error` and using a context logger initialised from that context
+2. If an error is _**not**_ returned (usually at the effective or actual root of the call hierarchy) it is logged, extracting any `Context` from the `error` and using a context logger initialized from that context
 
 Informational and warning logs may of course continue to be emitted at every level in the call hierarchy.
 
