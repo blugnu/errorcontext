@@ -8,7 +8,6 @@ import (
 )
 
 func TestFromErrorReturnsDefaultContextIfNoErrorWithContextIsFound(t *testing.T) {
-
 	// ARRANGE
 	ctx := context.Background()
 	err := errors.New("no context")
@@ -24,8 +23,25 @@ func TestFromErrorReturnsDefaultContextIfNoErrorWithContextIsFound(t *testing.T)
 	}
 }
 
-func TestFromErrorReturnsTheDeepestContext(t *testing.T) {
+func TestFromErrorReturnsContextFromAnErrorContext(t *testing.T) {
+	// ARRANGE
+	ctx := context.Background()
+	err := ErrorWithContext{ctx: ctx}
 
+	type key string
+
+	// ACT
+	newctx := context.WithValue(ctx, key("k"), "value")
+	got := From(newctx, err)
+
+	// ASSERT
+	wanted := ctx
+	if wanted != got {
+		t.Errorf("wanted %v, got %v", ctx, got)
+	}
+}
+
+func TestFromErrorReturnsTheDeepestContext(t *testing.T) {
 	// ARRANGE
 	type keytype int
 	const key keytype = 1
@@ -33,7 +49,7 @@ func TestFromErrorReturnsTheDeepestContext(t *testing.T) {
 	initial := context.Background()
 	ctx := context.WithValue(initial, key, "value")
 
-	err := &ErrorWithContext{ctx: ctx, error: errors.New("no context")}
+	err := ErrorWithContext{ctx: ctx, error: errors.New("no context")}
 	buried := fmt.Errorf("buried: %w", err)
 	inner := fmt.Errorf("inner: %w", buried)
 	outer := fmt.Errorf("outer: %w", inner)

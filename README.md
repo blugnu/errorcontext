@@ -1,7 +1,7 @@
 <div align="center" style="margin-bottom:20px">
   <img src=".assets/banner.png" alt="errorcontext" />
   <div align="center">
-    <a href="https://github.com/blugnu/errorcontext/actions/workflows/qa.yml"><img alt="build-status" src="https://github.com/blugnu/errorcontext/actions/workflows/qa.yml/badge.svg?branch=master&style=flat-square"/></a>
+    <a href="https://github.com/blugnu/errorcontext/actions/workflows/pipeline.yml"><img alt="build-status" src="https://github.com/blugnu/errorcontext/actions/workflows/pipeline.yml/badge.svg"/></a>
     <a href="https://goreportcard.com/report/github.com/blugnu/errorcontext" ><img alt="go report" src="https://goreportcard.com/badge/github.com/blugnu/errorcontext"/></a>
     <a><img alt="go version >= 1.14" src="https://img.shields.io/github/go-mod/go-version/blugnu/errorcontext?style=flat-square"/></a>
     <a href="https://github.com/blugnu/errorcontext/blob/master/LICENSE"><img alt="MIT License" src="https://img.shields.io/github/license/blugnu/errorcontext?color=%234275f5&style=flat-square"/></a>
@@ -10,15 +10,14 @@
   </div>
 </div>
 
-<br/>
-
-# blugnu/errorcontext
 
 > **TL;DR**: to get started, `go get github.com/blugnu/errorcontext@v0.2.0` (or later, if available)
 
-> **NOTE:** _this module was one of the first that I developed and I made some mistakes when initially publishing it.  This has resulted in problems with version `v0.1.0` already cached in the golang ecosystem.  The first useable version of this module therefore is `v0.2.0`._
+> **NOTE:** _the original incarnation of this module was one of the first that I released publicly and I made some mistakes_. _This resulted in problems with version `v0.1.0` already cached in the golang ecosystem.  The first useable version of this module is therefore `v0.2.0`.<br/>:blush:_
 
-A `go` package providing an `error` implementation that wraps an `error` together with a supplied `Context`.  A number of factory functions are provided to create/wrap contextual errors in a variety of circumstances:
+A `go` package providing an `error` implementation that wraps an `error` together with a supplied `Context`.
+
+A number of factory functions are provided to create/wrap contextual errors in a variety of circumstances:
 
 | function | description |
 | -- | -- |

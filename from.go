@@ -10,9 +10,9 @@ import (
 // ErrorWithContext (and does not wrap one) the supplied `context` is
 // returned.
 func From(ctx context.Context, err error) context.Context {
-	wrapped := &ErrorWithContext{}
+	wrapped := ErrorWithContext{}
 	if errors.As(err, &wrapped) {
-		return wrapped.Context()
+		return wrapped.ctx
 	}
 	return ctx
 }
