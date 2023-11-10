@@ -1,12 +1,24 @@
 <div align="center" style="margin-bottom:20px">
   <img src=".assets/banner.png" alt="errorcontext" />
   <div align="center">
-    <a href="https://github.com/blugnu/errorcontext/actions/workflows/release.yml"><img alt="build-status" src="https://github.com/blugnu/errorcontext/actions/workflows/release.yml/badge.svg"/></a>
-    <a href="https://goreportcard.com/report/github.com/blugnu/errorcontext" ><img alt="go report" src="https://goreportcard.com/badge/github.com/blugnu/errorcontext"/></a>
-    <a><img alt="go version >= 1.14" src="https://img.shields.io/github/go-mod/go-version/blugnu/errorcontext?style=flat-square"/></a>
-    <a href="https://github.com/blugnu/errorcontext/blob/master/LICENSE"><img alt="MIT License" src="https://img.shields.io/github/license/blugnu/errorcontext?color=%234275f5&style=flat-square"/></a>
-    <a href="https://coveralls.io/github/blugnu/errorcontext?branch=master"><img alt="coverage" src="https://img.shields.io/coveralls/github/blugnu/errorcontext?style=flat-square"/></a>
-    <a href="https://pkg.go.dev/github.com/blugnu/errorcontext"><img alt="docs" src="https://pkg.go.dev/badge/github.com/blugnu/errorcontext"/></a>
+    <a href="https://github.com/blugnu/errorcontext/actions/workflows/release.yml">
+      <img alt="build-status" src="https://github.com/blugnu/errorcontext/actions/workflows/release.yml/badge.svg"/>
+    </a>
+    <a href="https://goreportcard.com/report/github.com/blugnu/errorcontext" >
+      <img alt="go report" src="https://goreportcard.com/badge/github.com/blugnu/errorcontext"/>
+    </a>
+    <a>
+      <img alt="go version >= 1.14" src="https://img.shields.io/github/go-mod/go-version/blugnu/errorcontext?style=flat-square"/>
+    </a>
+    <a href="https://github.com/blugnu/errorcontext/blob/master/LICENSE">
+      <img alt="MIT License" src="https://img.shields.io/github/license/blugnu/errorcontext?color=%234275f5&style=flat-square"/>
+    </a>
+    <a href="https://coveralls.io/github/blugnu/errorcontext?branch=master">
+      <img alt="coverage" src="https://img.shields.io/coveralls/github/blugnu/errorcontext?style=flat-square"/>
+    </a>
+    <a href="https://pkg.go.dev/github.com/blugnu/errorcontext">
+      <img alt="docs" src="https://pkg.go.dev/badge/github.com/blugnu/errorcontext"/>
+    </a>
   </div>
 </div>
 
@@ -15,6 +27,15 @@
 > **TL;DR**: to get started, `go get github.com/blugnu/errorcontext` (or later, if available)
 
 A `go` package providing an `error` implementation that wraps an `error` together with a `context.Context`.
+
+## Tech Stack
+
+blugnu/errorcontext is built on the following main stack:
+
+- <img width='25' height='25' src='https://img.stackshare.io/service/1005/O6AczwfV_400x400.png' alt='Golang'/> [Golang](http://golang.org/) – Languages
+- <img width='25' height='25' src='https://img.stackshare.io/service/11563/actions.png' alt='GitHub Actions'/> [GitHub Actions](https://github.com/features/actions) – Continuous Integration
+
+Full tech stack [here](/techstack.md)
 
 ## History
 
