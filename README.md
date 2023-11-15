@@ -10,12 +10,20 @@
   </div>
 </div>
 
+# blugnu/errorcontext
 
-> **TL;DR**: to get started, `go get github.com/blugnu/errorcontext@v0.2.0` (or later, if available)
-
-> **NOTE:** _the original incarnation of this module was one of the first that I released publicly and I made some mistakes_. _This resulted in problems with version `v0.1.0` already cached in the golang ecosystem.  The first useable version of this module is therefore `v0.2.0`.<br/>:blush:_
+> **TL;DR**: to get started, `go get github.com/blugnu/errorcontext` (or later, if available)
 
 A `go` package providing an `error` implementation that wraps an `error` together with a supplied `Context`.
+
+## History
+
+This module is a ground-up re-write of the previously released (and still available) `go-errorcontext` module.  This new implementation incorporate a number of improvements and simplifies the API.
+
+It has been renamed as `errorcontext` rather than being a v2 release of the original as the opportunity has also been taken to remove the superfluous and cumbersome `go-` prefix from the module name.
+
+
+## Creating Errors
 
 A number of factory functions are provided to create/wrap contextual errors in a variety of circumstances:
 
@@ -23,11 +31,9 @@ A number of factory functions are provided to create/wrap contextual errors in a
 | -- | -- |
 | `New(ctx, s)` | creates a new error using `errors.New()` given a string |
 | `Errorf(ctx, format, args...)` | creates a new error using `fmt.Errorf()` given a format string and args |
-| `Wrap(ctx, err)` | creates an error that wraps an existing error |
+| `Wrap(ctx, err [, err, err])` | creates an error wrapping one or more existing errors together with a specified `Context` |
 
-All functions require a `Context`, to be associated with the `error`.
-
-## Creating Errors
+All functions require a `Context`.
 
 ### _example: New()_
 ```golang
@@ -51,15 +57,31 @@ _2. wrapping an existing error with textual context_
 ```
 
 ### _example: Wrap()_
+_1. wrapping an existing error_
 ```golang
     if err := db.QueryContext(ctx, sql, args); err != nil {
         return errorcontext.Wrap(ctx, err)
     }
 ```
+_2. wrapping two errors_
+When wrapping two (2) errors they are composed into an `error: cause` error chain, equivalent to `Wrap(ctx, fmt.Errorf("%w: %w", err1, err2))`; this is a useful pattern for attaching a sentinel error to some arbitrary error, typically to simplify testing:
+```golang
+    if err := db.QueryContext(ctx, sql, args); err != nil {
+        return errorcontext.Wrap(ctx, ErrQueryFailed, err)
+    }
+```
+A test of a function containing this code can check for the sentinel error without being coupled to details of the error returned by the function called by the function under test, for example:
+```golang
+    if err := Foo(ctx); !errors.Is(err, ErrQueryFailed) {
+        t.Errorf("expected ErrQueryFailed, got %v", err)
+    }
+```
+_3. wrapping three or more errors_
+When wrapping three (3) or more errors they are composed into a collection of errors, equivalent to `Wrap(ctx, errors.Join(err1, err2, err3, ...))`.
 
 ## Working With Errors
 
-Any associated `context` is obtained from an error (if required) by determining whether an error is (or wraps) an `ErrorWithContext`.  If an `ErrorWithContext` is available, the `Context()` function may then be called to obtain the `Context` associated with the error:
+The`context` captured by an `ErrorWithContext` may be obtained (if required) by determining whether an `error` is (or wraps) an `ErrorWithContext`.  If an `ErrorWithContext` is available, the `Context()` function may then be called to obtain the `Context` associated with the error:
 
 ```golang
 ctx := context.Background()
@@ -67,27 +89,31 @@ ctx := context.Background()
 // ...
 
 if err := Foo(ctx); err != nil {
-    ctx := ctx // shadow ctx for the context associated with the error
+    ctx := ctx // shadow ctx for the context associated with the error, if different from the current ctx
     ewc := ErrorWithContext{}
     if errors.As(err, &ewc) {
         ctx = ewc.Context()
     }
+    // whether ctx is still the original or one captured from the error,
+    // it is the most enriched context available and can be used to
+    // initialize a context logger, for example
     log := logger.FromContext(ctx)
+    log.Error(err)
 }
 ```
 
-The `errorcontext.From()` helper function provides a convenient way to do this, accepting a default `Context` (usually the current context) to use if no `Context` is captured by the `error`:
+The `errorcontext.From()` helper function provides a convenient way to do this, accepting a default `Context` (usually the current context) to use if no `Context` is captured by the `error`, simplifying the above to:
 
 ```golang
-    if err := SomeFooService(ctx, fooId); err != nil {
+    if err := Foo(ctx); err != nil {
         ctx := errorcontext.From(ctx, err)
         log := logger.FromContext(ctx)
         log.Error(err)
-        return
     }
 ```
-> _**NOTE:** The `Context()` function recursively unwraps any further `ErrorWithContext` errors in order to return the `Context` associated with the most-wrapped error possible.  This ensures that the most enriched `Context` that is available is returned._
+> _**NOTE:** The `Context()` function will recursively unwrap any further `ErrorWithContext` errors to return the `Context` associated with the most-wrapped error possible.  This ensures that the most enriched `Context` that is available is returned._
 
+<br>
 <br>
 
 # Intended Use
