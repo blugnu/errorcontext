@@ -16,7 +16,7 @@ func (err ErrorWithContext) Error() string {
 	if err.error != nil {
 		return err.error.Error()
 	}
-	return "unknown error"
+	return "unspecified error with context"
 }
 
 // Context returns the inner-most context accessible from
@@ -28,9 +28,9 @@ func (err ErrorWithContext) Error() string {
 // recursively until there are no more ErrorWithContext errors
 // to be unwrapped.
 func (err ErrorWithContext) Context() context.Context {
-	wrapped := ErrorWithContext{}
-	if errors.As(err.error, &wrapped) {
-		return wrapped.Context()
+	ewc := ErrorWithContext{}
+	if errors.As(err.error, &ewc) {
+		return ewc.Context()
 	}
 	return err.ctx
 }
@@ -39,24 +39,15 @@ func (err ErrorWithContext) Context() context.Context {
 // determine whether they are considered equal.
 //
 // A receiver will match with a target that:
-// - is an ErrorWithContext or *ErrorWithContext, and
-// - has an equal or nil context, and
-// - has a nil error or
-// - an error which satisfies errors.Is(receiver.error, target.error)
+// - is an ErrorWithContext; and
+// - has an equal or nil context; and
+// - has a nil error or an error which satisfies errors.Is(target.error, receiver.error)
 func (err ErrorWithContext) Is(target error) bool {
-	match := func(target *ErrorWithContext) bool {
+	if target, ok := target.(ErrorWithContext); ok {
 		return (target.ctx == nil || err.ctx == target.ctx) &&
-			(target.error == nil || errors.Is(err.error, target.error))
+			(target.error == nil || errors.Is(target.error, err.error))
 	}
-
-	switch target := target.(type) {
-	case ErrorWithContext:
-		return match(&target)
-	case *ErrorWithContext:
-		return match(target)
-	default:
-		return false
-	}
+	return false
 }
 
 // Unwrap returns the error wrapped by the ErrorWithContext.

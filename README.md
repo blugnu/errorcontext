@@ -10,12 +10,20 @@
   </div>
 </div>
 
+# blugnu/errorcontext
 
-> **TL;DR**: to get started, `go get github.com/blugnu/errorcontext@v0.2.0` (or later, if available)
-
-> **NOTE:** _the original incarnation of this module was one of the first that I released publicly and I made some mistakes_. _This resulted in problems with version `v0.1.0` already cached in the golang ecosystem.  The first useable version of this module is therefore `v0.2.0`.<br/>:blush:_
+> **TL;DR**: to get started, `go get github.com/blugnu/errorcontext` (or later, if available)
 
 A `go` package providing an `error` implementation that wraps an `error` together with a supplied `Context`.
+
+## History
+
+This module is a ground-up re-write of the previously released (and still available) `go-errorcontext` module.  This new implementation incorporate a number of improvements and simplifies the API.
+
+It has been renamed as `errorcontext` rather than being a v2 release of the original as the opportunity has also been taken to remove the superfluous and cumbersome `go-` prefix from the module name.
+
+
+## Creating Errors
 
 A number of factory functions are provided to create/wrap contextual errors in a variety of circumstances:
 
@@ -23,11 +31,9 @@ A number of factory functions are provided to create/wrap contextual errors in a
 | -- | -- |
 | `New(ctx, s)` | creates a new error using `errors.New()` given a string |
 | `Errorf(ctx, format, args...)` | creates a new error using `fmt.Errorf()` given a format string and args |
-| `Wrap(ctx, err)` | creates an error that wraps an existing error |
+| `Wrap(ctx, err)` | creates an error wrapping an existing error together with a specified `Context` |
 
-All functions require a `Context`, to be associated with the `error`.
-
-## Creating Errors
+All functions require a `Context`.
 
 ### _example: New()_
 ```golang
