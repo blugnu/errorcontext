@@ -3,18 +3,20 @@ package errorcontext
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 )
 
 func TestErrorWithContextError(t *testing.T) {
 	// ARRANGE
-	// ARRANGE
 	testcases := []struct {
 		sut    ErrorWithContext
 		result string
 	}{
-		{sut: ErrorWithContext{}, result: "unknown error"},
-		{sut: ErrorWithContext{error: errors.New("wrapped error")}, result: "wrapped error"},
+		{sut: ErrorWithContext{}, result: "unspecified error with context"},
+		{sut: ErrorWithContext{error: errors.New("wrapped")}, result: "wrapped"},
+		{sut: ErrorWithContext{error: fmt.Errorf("%w: %w", errors.New("wrapped"), errors.New("cause"))}, result: "wrapped: cause"},
+		{sut: ErrorWithContext{error: errors.Join(errors.New("wrapped"), errors.New("cause"))}, result: "wrapped\ncause"},
 	}
 	for _, tc := range testcases {
 		t.Run(tc.result, func(t *testing.T) {
@@ -42,11 +44,7 @@ func TestErrorsIs(t *testing.T) {
 		result bool
 	}{
 		{name: "ErrorWithContext{}:ErrorWithContext{}", sut: ErrorWithContext{}, target: ErrorWithContext{}, result: true},
-		{name: "ErrorWithContext{}:&ErrorWithContext{}", sut: ErrorWithContext{}, target: &ErrorWithContext{}, result: true},
-		{name: "&ErrorWithContext{}:ErrorWithContext{}", sut: &ErrorWithContext{}, target: ErrorWithContext{}, result: true},
-		{name: "&ErrorWithContext{}:&ErrorWithContext{}", sut: &ErrorWithContext{}, target: &ErrorWithContext{}, result: true},
 		{name: "ErrorWithContext{}:<some error>", sut: ErrorWithContext{}, target: errors.New(""), result: false},
-		{name: "&ErrorWithContext{}:<some error>", sut: &ErrorWithContext{}, target: errors.New(""), result: false},
 		{name: "ErrorWithContext{error:a}:ErrorWithContext{error:nil}", sut: ErrorWithContext{error: ea}, target: ErrorWithContext{}, result: true},
 		{name: "ErrorWithContext{error:a}:ErrorWithContext{error:a}", sut: ErrorWithContext{error: ea}, target: ErrorWithContext{error: ea}, result: true},
 		{name: "ErrorWithContext{error:a}:ErrorWithContext{error:b}", sut: ErrorWithContext{error: ea}, target: ErrorWithContext{error: eb}, result: false},

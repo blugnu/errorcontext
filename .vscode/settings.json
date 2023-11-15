@@ -1,6 +1,0 @@
-{
-    "sonarlint.connectedMode.project": {
-        "connectionId": "SonarCloud (blugnu)",
-        "projectKey": "blugnu:errorcontext"
-    }
-}
