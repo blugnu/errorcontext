@@ -35,6 +35,17 @@ A number of factory functions are provided to create/wrap contextual errors in a
 
 All functions require a `Context`.
 
+Factory functions are provided to create/wrap contextual errors in a variety of circumstances:
+
+| function | description | use in place of ... |
+| -- | -- | -- |
+| `New(ctx, s)` | creates a new error wrapping a `Context` with an error created using `errors.New()` with a supplied string | `errors.New(s)` |
+| `Errorf(ctx, format, args...)` | creates a new error using `fmt.Errorf()` given a format string and args | `fmt.Errorf(s, args...)` |
+| `Join(ctx, err...)` | uses `errors.Join()` to consolidate multiple errors and wrap the result (if not `nil`) with a specified context | `errors.Join(err1, err2, ...)` |
+| `Wrap(ctx, err...)` | creates a new error, wrapping a `Context` with one or two specified errors | `fmt.Errorf("%w: %w", err1, err2)`<br>or<br>`errors.Wrap(err1, err2)` |
+
+All functions require a `Context`.
+
 ### _example: New()_
 ```golang
     if len(sql) == 0 {
