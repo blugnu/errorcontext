@@ -12,7 +12,7 @@ import (
 func From(ctx context.Context, err error) context.Context {
 	wrapped := ErrorWithContext{}
 	if errors.As(err, &wrapped) {
-		return wrapped.ctx
+		return wrapped.Context()
 	}
 	return ctx
 }

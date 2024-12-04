@@ -3,63 +3,58 @@ package errorcontext
 import (
 	"context"
 	"errors"
-	"fmt"
 	"testing"
+
+	"github.com/blugnu/test"
 )
 
-func TestFromErrorReturnsDefaultContextIfNoErrorWithContextIsFound(t *testing.T) {
+func TestFromReturnsDefaultContextIfNoErrorWithContextIsFound(t *testing.T) {
 	// ARRANGE
-	ctx := context.Background()
+	defaultCtx := context.Background()
 	err := errors.New("no context")
 
 	// ACT
 
-	got := From(ctx, err)
+	result := From(defaultCtx, err)
 
 	// ASSERT
-	wanted := ctx
-	if wanted != got {
-		t.Errorf("wanted %v, got %v", wanted, got)
-	}
+	test.Value(t, result).Equals(defaultCtx)
 }
 
-func TestFromErrorReturnsContextFromAnErrorContext(t *testing.T) {
+func TestFromReturnsContextFromAnErrorContext(t *testing.T) {
 	// ARRANGE
-	ctx := context.Background()
-	err := ErrorWithContext{ctx: ctx}
-
 	type key string
 
+	baseCtx := context.Background()
+	valueCtx := context.WithValue(baseCtx, key("k"), "value")
+	err := ErrorWithContext{ctx: valueCtx}
+
 	// ACT
-	newctx := context.WithValue(ctx, key("k"), "value")
-	got := From(newctx, err)
+	result := From(baseCtx, err)
 
 	// ASSERT
-	wanted := ctx
-	if wanted != got {
-		t.Errorf("wanted %v, got %v", ctx, got)
-	}
+	test.Value(t, result).Equals(valueCtx)
 }
 
-func TestFromErrorReturnsTheDeepestContext(t *testing.T) {
+func TestFromReturnsTheDeepestContext(t *testing.T) {
 	// ARRANGE
 	type keytype int
 	const key keytype = 1
 
-	initial := context.Background()
-	ctx := context.WithValue(initial, key, "value")
+	baseCtx := context.Background()
+	valueCtx := context.WithValue(baseCtx, key, "value")
 
-	err := ErrorWithContext{ctx: ctx, error: errors.New("no context")}
-	buried := fmt.Errorf("buried: %w", err)
-	inner := fmt.Errorf("inner: %w", buried)
-	outer := fmt.Errorf("outer: %w", inner)
+	err := ErrorWithContext{
+		ctx: baseCtx,
+		error: ErrorWithContext{
+			ctx:   valueCtx,
+			error: errors.New("no context"),
+		},
+	}
 
 	// ACT
-	got := From(initial, outer)
+	result := From(baseCtx, err)
 
 	// ASSERT
-	wanted := ctx
-	if wanted != got {
-		t.Errorf("wanted %v, got %v", ctx, got)
-	}
+	test.Value(t, result).Equals(valueCtx)
 }
