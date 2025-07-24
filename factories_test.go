@@ -17,6 +17,7 @@ func TestFactories(t *testing.T) {
 	ctx := context.Background()
 	a := errors.New("a")
 	b := errors.New("b")
+	c := errors.New("c")
 
 	Run(Test("Errorf(\"narrative: %w\",a)", func() {
 		// act
@@ -130,10 +131,14 @@ func TestFactories(t *testing.T) {
 	}))
 
 	Run(Test("Wrap(nil,nil,nil)", func() {
-		// ARRANGE ASSERT
-		defer Expect(Panic(errorcontext.ErrIllegalOperation)).DidOccur()
+		err := errorcontext.Wrap(ctx, nil, nil, nil)
+		Expect(err).IsNil()
+	}))
 
-		// ACT
-		_ = errorcontext.Wrap(ctx, nil, nil, nil)
+	Run(Test("Wrap(a,b,c)", func() {
+		err := errorcontext.Wrap(ctx, a, b, c)
+		Expect(err).Is(a)
+		Expect(err).Is(b)
+		Expect(err).Is(c)
 	}))
 }

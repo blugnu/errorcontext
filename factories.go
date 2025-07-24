@@ -6,10 +6,6 @@ import (
 	"fmt"
 )
 
-// ErrIllegalOperation is an error returned by the
-// errorcontext package when an illegal operation is attempted.
-var ErrIllegalOperation = errors.New("illegal operation")
-
 // Errorf creates a new error with the supplied Context. The function
 // is an analog for [fmt.Errorf].
 func Errorf(ctx context.Context, format string, args ...any) error {
@@ -41,7 +37,7 @@ func New(ctx context.Context, s string) error {
 //
 // # Called with 1 Error
 //
-// If only one non-nil error is specified it is wrapped directly.
+// If only one non-nil error is specified it is wrapped.
 //
 // # Called with 2 Errors
 //
@@ -54,36 +50,47 @@ func New(ctx context.Context, s string) error {
 //	errorcontext.Wrap(ctx, fmt.Errorf("%w: %w", a, b))
 //
 // If either a or b are nil (but not both), the non-nil error is
-// wrapped directly.
+// wrapped.
+//
+// If both a and b are nil, the function returns nil.
 //
 // # Called with > 2 errors
 //
-// The function will panic with ErrIllegalOperation if called
-// with 3 or more error arguments, whether or not any or all of
-// those arguments are nil.  To wrap three or more errors use
-// the errorcontext.Join function.
+// If more than two errors are specified, the function behaves
+// similarly to the case with two errors, with all errors other than
+// the first joined.
+//
+// i.e. the following are equivalent statements when a, b, and c are non-nil:
+//
+//	errorcontext.Wrap(ctx, a, b, c)
+//	errorcontext.Wrap(ctx, fmt.Errorf("%w: %w", a, errors.Join(b, c)))
+//
+// If a is nil, the function returns an ErrorWithContext that wraps
+// the joined errors b and c.
 func Wrap(ctx context.Context, err error, errs ...error) error {
-	switch 1 + len(errs) {
+	switch len(errs) {
+	case 0:
+		// just err
+
 	case 1:
-		if err != nil {
-			return ErrorWithContext{ctx, err}
+		if err == nil {
+			err = errs[0]
+		} else if errs[0] != nil {
+			err = fmt.Errorf("%w: %w", err, errs[0])
 		}
 
-	case 2:
-		switch {
-		case err == nil && errs[0] != nil:
-			return ErrorWithContext{ctx, errs[0]}
-
-		case err != nil && errs[0] == nil:
-			return ErrorWithContext{ctx, err}
-
-		case err != nil && errs[0] != nil:
-			return ErrorWithContext{ctx, fmt.Errorf("%w: %w", err, errs[0])}
+	default: // err + 2 or more errors
+		joined := errors.Join(errs...)
+		if err == nil {
+			err = joined
+		} else {
+			err = fmt.Errorf("%w: %w", err, joined)
 		}
-
-	default:
-		panic(fmt.Errorf("errorcontext.Wrap: %w: may only be called with 1 or 2 errors; "+
-			"use errorcontext.Join for > 2 error arguments", ErrIllegalOperation))
 	}
-	return nil
+
+	if err == nil {
+		return nil
+	}
+
+	return ErrorWithContext{ctx, err}
 }
