@@ -5,163 +5,135 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/blugnu/test"
+	. "github.com/blugnu/test"
 
 	"github.com/blugnu/errorcontext"
 )
 
 func TestFactories(t *testing.T) {
+	With(t)
+
 	// ARRANGE
 	ctx := context.Background()
 	a := errors.New("a")
 	b := errors.New("b")
 
-	testcases := []struct {
-		scenario string
-		exec     func(t *testing.T)
-	}{
-		// Errorf tests
-		{scenario: "Errorf(\"narrative: %w\",a)",
-			exec: func(t *testing.T) {
-				// ACT
-				result := errorcontext.Errorf(ctx, "narrative: %w", a)
+	Run(Test("Errorf(\"narrative: %w\",a)", func() {
+		// act
+		result := errorcontext.Errorf(ctx, "narrative: %w", a)
 
-				// ASSERT
-				test.IsTrue(t, result != nil)
-				test.That(t, result.Error()).Equals("narrative: a")
-				if result, ok := test.IsType[errorcontext.ErrorWithContext](t, result); ok {
-					test.Error(t, result).Is(a)
-				}
-			},
-		},
+		// assert
+		Expect(result).IsNotNil()
+		Expect(result.Error()).To(Equal("narrative: a"))
 
-		// errorcontext.Join tests
-		{scenario: "Join(nil)",
-			exec: func(t *testing.T) {
-				// ACT
-				result := errorcontext.Join(ctx, nil)
+		var err error = RequireType[errorcontext.ErrorWithContext](result)
+		Expect(err).Is(a)
+	}))
 
-				// ASSERT
-				test.IsNil(t, result)
-			},
-		},
-		{scenario: "Join(a)",
-			exec: func(t *testing.T) {
-				// ACT
-				result := errorcontext.Join(ctx, a)
+	// errorcontext.Join tests
+	Run(Test("Join(nil)", func() {
+		// ACT
+		result := errorcontext.Join(ctx, nil)
 
-				// ASSERT
-				test.IsTrue(t, result != nil)
-				test.That(t, result.Error()).Equals("a")
-				if result, ok := test.IsType[errorcontext.ErrorWithContext](t, result); ok {
-					test.Error(t, result).Is(a)
-				}
-			},
-		},
-		{scenario: "Join(a,b)",
-			exec: func(t *testing.T) {
-				// ACT
-				result := errorcontext.Join(ctx, a, b)
+		// ASSERT
+		Expect(result).IsNil()
+	}))
 
-				// ASSERT
-				test.IsTrue(t, result != nil)
-				test.That(t, result.Error()).Equals("a\nb")
-				if result, ok := test.IsType[errorcontext.ErrorWithContext](t, result); ok {
-					test.Error(t, result).Is(a)
-					test.Error(t, result).Is(b)
-				}
-			},
-		},
+	Run(Test("Join(a)", func() {
+		// ACT
+		result := errorcontext.Join(ctx, a)
 
-		// New tests
-		{scenario: "New(ctx, \"a\")",
-			exec: func(t *testing.T) {
-				// ACT
-				result := errorcontext.New(ctx, "a")
+		// ASSERT
+		Expect(result).IsNotNil()
+		Expect(result.Error()).To(Equal("a"))
+		var err error = RequireType[errorcontext.ErrorWithContext](result)
+		Expect(err).Is(a)
+	}))
 
-				// ASSERT
-				test.IsTrue(t, result != nil)
-				test.That(t, result.Error()).Equals("a")
-				_, _ = test.IsType[errorcontext.ErrorWithContext](t, result)
-			},
-		},
+	Run(Test("Join(a,b)", func() {
+		// ACT
+		result := errorcontext.Join(ctx, a, b)
 
-		// errorcontext.Wrap tests
-		{scenario: "Wrap(nil)",
-			exec: func(t *testing.T) {
-				// ACT
-				result := errorcontext.Wrap(ctx, nil)
+		// ASSERT
+		Expect(result).IsNotNil()
+		Expect(result.Error()).To(Equal("a\nb"))
 
-				// ASSERT
-				test.IsNil(t, result)
-			},
-		},
-		{scenario: "Wrap(a)",
-			exec: func(t *testing.T) {
-				// ACT
-				result := errorcontext.Wrap(ctx, a)
+		var err error = RequireType[errorcontext.ErrorWithContext](result)
+		Expect(err).Is(a)
+	}))
 
-				// ASSERT
-				test.IsTrue(t, result != nil)
-				test.That(t, result.Error()).Equals("a")
-				if result, ok := test.IsType[errorcontext.ErrorWithContext](t, result); ok {
-					test.Error(t, result).Is(a)
-				}
-			},
-		},
-		{scenario: "Wrap(a, nil)",
-			exec: func(t *testing.T) {
-				// ACT
-				result := errorcontext.Wrap(ctx, a, nil)
+	Run(Test("New(ctx, \"a\")", func() {
+		// ACT
+		result := errorcontext.New(ctx, "a")
 
-				// ASSERT
-				test.IsTrue(t, result != nil)
-				test.That(t, result.Error()).Equals("a")
-				if result, ok := test.IsType[errorcontext.ErrorWithContext](t, result); ok {
-					test.Error(t, result).Is(a)
-				}
-			},
-		},
-		{scenario: "Wrap(nil,b)",
-			exec: func(t *testing.T) {
-				// ACT
-				result := errorcontext.Wrap(ctx, nil, b)
+		// ASSERT
+		Expect(result).IsNotNil()
+		Expect(result.Error()).To(Equal("a"))
+		_ = RequireType[errorcontext.ErrorWithContext](result)
+	}))
 
-				// ASSERT
-				test.IsTrue(t, result != nil)
-				test.That(t, result.Error()).Equals("b")
-				if result, ok := test.IsType[errorcontext.ErrorWithContext](t, result); ok {
-					test.Error(t, result).Is(b)
-				}
-			},
-		},
-		{scenario: "Wrap(a,b)",
-			exec: func(t *testing.T) {
-				// ACT
-				result := errorcontext.Wrap(ctx, a, b)
+	Run(Test("Wrap(nil)", func() {
+		// ACT
+		result := errorcontext.Wrap(ctx, nil)
 
-				// ASSERT
-				test.IsTrue(t, result != nil)
-				test.That(t, result.Error()).Equals("a: b")
-				if result, ok := test.IsType[errorcontext.ErrorWithContext](t, result); ok {
-					test.Error(t, result).Is(a)
-					test.Error(t, result).Is(b)
-				}
-			},
-		},
-		{scenario: "Wrap(nil,nil,nil)",
-			exec: func(t *testing.T) {
-				// ARRANGE ASSERT
-				defer test.ExpectPanic(errorcontext.ErrIllegalOperation).Assert(t)
+		// ASSERT
+		Expect(result).IsNil()
+	}))
 
-				// ACT
-				_ = errorcontext.Wrap(ctx, nil, nil, nil)
-			},
-		},
-	}
-	for _, tc := range testcases {
-		t.Run(tc.scenario, func(t *testing.T) {
-			tc.exec(t)
-		})
-	}
+	Run(Test("Wrap(a)", func() {
+		// ACT
+		result := errorcontext.Wrap(ctx, a)
+
+		// ASSERT
+		Expect(result).IsNotNil()
+		Expect(result.Error()).To(Equal("a"))
+
+		var err error = RequireType[errorcontext.ErrorWithContext](result)
+		Expect(err).Is(a)
+	}))
+
+	Run(Test("Wrap(a, nil)", func() {
+		// ACT
+		result := errorcontext.Wrap(ctx, a, nil)
+
+		// ASSERT
+		Expect(result).IsNotNil()
+		Expect(result.Error()).To(Equal("a"))
+
+		var err error = RequireType[errorcontext.ErrorWithContext](result)
+		Expect(err).Is(a)
+	}))
+
+	Run(Test("Wrap(nil,b)", func() {
+		// ACT
+		result := errorcontext.Wrap(ctx, nil, b)
+
+		// ASSERT
+		Expect(result).IsNotNil()
+		Expect(result.Error()).To(Equal("b"))
+
+		var err error = RequireType[errorcontext.ErrorWithContext](result)
+		Expect(err).Is(b)
+	}))
+
+	Run(Test("Wrap(a,b)", func() {
+		// ACT
+		result := errorcontext.Wrap(ctx, a, b)
+
+		// ASSERT
+		Expect(result).IsNotNil()
+		Expect(result.Error()).To(Equal("a: b"))
+
+		var err error = RequireType[errorcontext.ErrorWithContext](result)
+		Expect(err).Is(a)
+		Expect(result).Is(b)
+	}))
+
+	Run(Test("Wrap(nil,nil,nil)", func() {
+		// ARRANGE ASSERT
+		defer Expect(Panic(errorcontext.ErrIllegalOperation)).DidOccur()
+
+		// ACT
+		_ = errorcontext.Wrap(ctx, nil, nil, nil)
+	}))
 }

@@ -5,41 +5,47 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/blugnu/test"
+	. "github.com/blugnu/test"
 
 	"github.com/blugnu/errorcontext"
 )
 
 func TestFromReturnsDefaultContextIfNoErrorWithContextIsFound(t *testing.T) {
-	// ARRANGE
+	With(t)
+
+	// arrange
 	defaultCtx := context.Background()
 	err := errors.New("no context")
 
-	// ACT
+	// act
 
 	result := errorcontext.From(defaultCtx, err)
 
-	// ASSERT
-	test.Value(t, result).Equals(defaultCtx)
+	// assert
+	Expect(result).To(Equal(defaultCtx))
 }
 
 func TestFromReturnsContextFromAnErrorContext(t *testing.T) {
-	// ARRANGE
+	With(t)
+
+	// arrange
 	type key string
 
 	baseCtx := context.Background()
 	valueCtx := context.WithValue(baseCtx, key("k"), "value")
 	err := errorcontext.New(valueCtx, "")
 
-	// ACT
+	// act
 	result := errorcontext.From(baseCtx, err)
 
-	// ASSERT
-	test.Value(t, result).Equals(valueCtx)
+	// assert
+	Expect(result).To(Equal(valueCtx))
 }
 
 func TestFromReturnsTheDeepestContext(t *testing.T) {
-	// ARRANGE
+	With(t)
+
+	// arrange
 	type keytype int
 	const key keytype = 1
 
@@ -48,9 +54,9 @@ func TestFromReturnsTheDeepestContext(t *testing.T) {
 
 	err := errorcontext.Wrap(baseCtx, errorcontext.Wrap(valueCtx, errors.New("no context")))
 
-	// ACT
+	// act
 	result := errorcontext.From(baseCtx, err)
 
-	// ASSERT
-	test.Value(t, result).Equals(valueCtx)
+	// assert
+	Expect(result).To(Equal(valueCtx))
 }
