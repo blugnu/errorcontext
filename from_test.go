@@ -1,4 +1,4 @@
-package errorcontext
+package errorcontext_test
 
 import (
 	"context"
@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	"github.com/blugnu/test"
+
+	"github.com/blugnu/errorcontext"
 )
 
 func TestFromReturnsDefaultContextIfNoErrorWithContextIsFound(t *testing.T) {
@@ -15,7 +17,7 @@ func TestFromReturnsDefaultContextIfNoErrorWithContextIsFound(t *testing.T) {
 
 	// ACT
 
-	result := From(defaultCtx, err)
+	result := errorcontext.From(defaultCtx, err)
 
 	// ASSERT
 	test.Value(t, result).Equals(defaultCtx)
@@ -27,10 +29,10 @@ func TestFromReturnsContextFromAnErrorContext(t *testing.T) {
 
 	baseCtx := context.Background()
 	valueCtx := context.WithValue(baseCtx, key("k"), "value")
-	err := ErrorWithContext{ctx: valueCtx}
+	err := errorcontext.New(valueCtx, "")
 
 	// ACT
-	result := From(baseCtx, err)
+	result := errorcontext.From(baseCtx, err)
 
 	// ASSERT
 	test.Value(t, result).Equals(valueCtx)
@@ -44,16 +46,10 @@ func TestFromReturnsTheDeepestContext(t *testing.T) {
 	baseCtx := context.Background()
 	valueCtx := context.WithValue(baseCtx, key, "value")
 
-	err := ErrorWithContext{
-		ctx: baseCtx,
-		error: ErrorWithContext{
-			ctx:   valueCtx,
-			error: errors.New("no context"),
-		},
-	}
+	err := errorcontext.Wrap(baseCtx, errorcontext.Wrap(valueCtx, errors.New("no context")))
 
 	// ACT
-	result := From(baseCtx, err)
+	result := errorcontext.From(baseCtx, err)
 
 	// ASSERT
 	test.Value(t, result).Equals(valueCtx)

@@ -1,4 +1,4 @@
-package errorcontext
+package errorcontext_test
 
 import (
 	"context"
@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	"github.com/blugnu/test"
+
+	"github.com/blugnu/errorcontext"
 )
 
 func TestFactories(t *testing.T) {
@@ -22,22 +24,22 @@ func TestFactories(t *testing.T) {
 		{scenario: "Errorf(\"narrative: %w\",a)",
 			exec: func(t *testing.T) {
 				// ACT
-				result := Errorf(ctx, "narrative: %w", a)
+				result := errorcontext.Errorf(ctx, "narrative: %w", a)
 
 				// ASSERT
 				test.IsTrue(t, result != nil)
 				test.That(t, result.Error()).Equals("narrative: a")
-				if result, ok := test.IsType[ErrorWithContext](t, result); ok {
+				if result, ok := test.IsType[errorcontext.ErrorWithContext](t, result); ok {
 					test.Error(t, result).Is(a)
 				}
 			},
 		},
 
-		// Join tests
+		// errorcontext.Join tests
 		{scenario: "Join(nil)",
 			exec: func(t *testing.T) {
 				// ACT
-				result := Join(ctx, nil)
+				result := errorcontext.Join(ctx, nil)
 
 				// ASSERT
 				test.IsNil(t, result)
@@ -46,12 +48,12 @@ func TestFactories(t *testing.T) {
 		{scenario: "Join(a)",
 			exec: func(t *testing.T) {
 				// ACT
-				result := Join(ctx, a)
+				result := errorcontext.Join(ctx, a)
 
 				// ASSERT
 				test.IsTrue(t, result != nil)
 				test.That(t, result.Error()).Equals("a")
-				if result, ok := test.IsType[ErrorWithContext](t, result); ok {
+				if result, ok := test.IsType[errorcontext.ErrorWithContext](t, result); ok {
 					test.Error(t, result).Is(a)
 				}
 			},
@@ -59,12 +61,12 @@ func TestFactories(t *testing.T) {
 		{scenario: "Join(a,b)",
 			exec: func(t *testing.T) {
 				// ACT
-				result := Join(ctx, a, b)
+				result := errorcontext.Join(ctx, a, b)
 
 				// ASSERT
 				test.IsTrue(t, result != nil)
 				test.That(t, result.Error()).Equals("a\nb")
-				if result, ok := test.IsType[ErrorWithContext](t, result); ok {
+				if result, ok := test.IsType[errorcontext.ErrorWithContext](t, result); ok {
 					test.Error(t, result).Is(a)
 					test.Error(t, result).Is(b)
 				}
@@ -75,20 +77,20 @@ func TestFactories(t *testing.T) {
 		{scenario: "New(ctx, \"a\")",
 			exec: func(t *testing.T) {
 				// ACT
-				result := New(ctx, "a")
+				result := errorcontext.New(ctx, "a")
 
 				// ASSERT
 				test.IsTrue(t, result != nil)
 				test.That(t, result.Error()).Equals("a")
-				_, _ = test.IsType[ErrorWithContext](t, result)
+				_, _ = test.IsType[errorcontext.ErrorWithContext](t, result)
 			},
 		},
 
-		// Wrap tests
+		// errorcontext.Wrap tests
 		{scenario: "Wrap(nil)",
 			exec: func(t *testing.T) {
 				// ACT
-				result := Wrap(ctx, nil)
+				result := errorcontext.Wrap(ctx, nil)
 
 				// ASSERT
 				test.IsNil(t, result)
@@ -97,12 +99,12 @@ func TestFactories(t *testing.T) {
 		{scenario: "Wrap(a)",
 			exec: func(t *testing.T) {
 				// ACT
-				result := Wrap(ctx, a)
+				result := errorcontext.Wrap(ctx, a)
 
 				// ASSERT
 				test.IsTrue(t, result != nil)
 				test.That(t, result.Error()).Equals("a")
-				if result, ok := test.IsType[ErrorWithContext](t, result); ok {
+				if result, ok := test.IsType[errorcontext.ErrorWithContext](t, result); ok {
 					test.Error(t, result).Is(a)
 				}
 			},
@@ -110,12 +112,12 @@ func TestFactories(t *testing.T) {
 		{scenario: "Wrap(a, nil)",
 			exec: func(t *testing.T) {
 				// ACT
-				result := Wrap(ctx, a, nil)
+				result := errorcontext.Wrap(ctx, a, nil)
 
 				// ASSERT
 				test.IsTrue(t, result != nil)
 				test.That(t, result.Error()).Equals("a")
-				if result, ok := test.IsType[ErrorWithContext](t, result); ok {
+				if result, ok := test.IsType[errorcontext.ErrorWithContext](t, result); ok {
 					test.Error(t, result).Is(a)
 				}
 			},
@@ -123,12 +125,12 @@ func TestFactories(t *testing.T) {
 		{scenario: "Wrap(nil,b)",
 			exec: func(t *testing.T) {
 				// ACT
-				result := Wrap(ctx, nil, b)
+				result := errorcontext.Wrap(ctx, nil, b)
 
 				// ASSERT
 				test.IsTrue(t, result != nil)
 				test.That(t, result.Error()).Equals("b")
-				if result, ok := test.IsType[ErrorWithContext](t, result); ok {
+				if result, ok := test.IsType[errorcontext.ErrorWithContext](t, result); ok {
 					test.Error(t, result).Is(b)
 				}
 			},
@@ -136,12 +138,12 @@ func TestFactories(t *testing.T) {
 		{scenario: "Wrap(a,b)",
 			exec: func(t *testing.T) {
 				// ACT
-				result := Wrap(ctx, a, b)
+				result := errorcontext.Wrap(ctx, a, b)
 
 				// ASSERT
 				test.IsTrue(t, result != nil)
 				test.That(t, result.Error()).Equals("a: b")
-				if result, ok := test.IsType[ErrorWithContext](t, result); ok {
+				if result, ok := test.IsType[errorcontext.ErrorWithContext](t, result); ok {
 					test.Error(t, result).Is(a)
 					test.Error(t, result).Is(b)
 				}
@@ -150,10 +152,10 @@ func TestFactories(t *testing.T) {
 		{scenario: "Wrap(nil,nil,nil)",
 			exec: func(t *testing.T) {
 				// ARRANGE ASSERT
-				defer test.ExpectPanic(ErrIllegalOperation).Assert(t)
+				defer test.ExpectPanic(errorcontext.ErrIllegalOperation).Assert(t)
 
 				// ACT
-				_ = Wrap(ctx, nil, nil, nil)
+				_ = errorcontext.Wrap(ctx, nil, nil, nil)
 			},
 		},
 	}
