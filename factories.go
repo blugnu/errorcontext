@@ -6,20 +6,18 @@ import (
 	"fmt"
 )
 
+// ErrIllegalOperation is an error returned by the
+// errorcontext package when an illegal operation is attempted.
 var ErrIllegalOperation = errors.New("illegal operation")
 
-// Errorf creates a new error with the supplied Context.
-// The error wraps an error created by passing a supplied
-// format string and args to `fmt.Errorf()`.
-//
-// Since `fmt.Errorf` is used, %w may be used in the format
-// string and an existing error passed as appropriate.
-func Errorf(ctx context.Context, format string, args ...interface{}) error {
+// Errorf creates a new error with the supplied Context. The function
+// is an analog for [fmt.Errorf].
+func Errorf(ctx context.Context, format string, args ...any) error {
 	return ErrorWithContext{ctx, fmt.Errorf(format, args...)}
 }
 
 // Join creates a new error wrapping any number of supplied errors
-// with a specified context.
+// with a specified context. The function is an analog for [errors.Join].
 //
 // If all errors are nil then the function returns nil.
 func Join(ctx context.Context, errs ...error) error {
@@ -29,16 +27,14 @@ func Join(ctx context.Context, errs ...error) error {
 	return nil
 }
 
-// New creates a new error with the supplied Context.
-// The error wraps a new error created by passing the
-// specified string to `errors.New()`.
+// New creates a new error with the supplied Context. The function is
+// an analog for [errors.New].
 func New(ctx context.Context, s string) error {
 	return ErrorWithContext{ctx, errors.New(s)}
 }
 
-// Wrap creates a new error wrapping one or two errors with a
-// specified context.  If both errors are nil then the function
-// returns nil.
+// Wrap creates a new error wrapping one or more errors with a
+// specified context.
 //
 // The error returned by the function wraps the specified error(s)
 // differently, depending on the number of non-nil errors specified.
